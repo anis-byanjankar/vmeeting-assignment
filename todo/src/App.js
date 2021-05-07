@@ -1,12 +1,35 @@
 import './App.css';
-import React, { Component } from 'react'
+import React, { Component,setState } from 'react'
 
 class TodoApp extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      showTodos: true
+    }
+    this.handleToggleTodoList = this.handleToggleTodoList.bind(this);
+  }
+  handleToggleTodoList(e) {
+    e.preventDefault();
+    this.setState({ showTodos: !this.state.showTodos })
+    console.log(e);
+  }
   render() {
+    this.todoListElement = [
+      { "name": "Learn React", "complete": true },
+      { "name": "Learn React2", "complete": false },
+      { "name": "Learn React3", "complete": true }
+    ]
+
     return (
-      <section class="todoapp">
+      <section className="todoapp">
         <InputArea />
-        <TodoList />
+      
+          <TodoList
+            todoListElement={this.todoListElement}
+            handleToggleTodoList={this.handleToggleTodoList}
+            toggleListState={this.state.showTodos}
+          />
         <Footer />
       </section>
     );
@@ -18,7 +41,7 @@ class InputArea extends React.Component {
     return (
       <header className="header">
         <h1>todos</h1>
-        <input className="new-todo" placeholder="What needs to bo done ? "></input>
+        <input className="new-todo" placeholder="What needs to bo done ?"></input>
       </header>
     );
   }
@@ -26,36 +49,43 @@ class InputArea extends React.Component {
 
 class TodoList extends React.Component {
   render() {
+    const todos = this.props.todoListElement.map((todo) => (
+      <Todo
+        key={todo.name}
+        name={todo.name}
+        complete={todo.complete}
+      />
+    ));
+
     return (
-      <section class="main">
-        <input id="toggle-all" className="toggle-all" type="checkbox"></input>
-        <label for="toggle-all">Mark as Complete!</label>
+      <section className="main">
+        <input id="toggle-all" className="toggle-all" type="checkbox" onClick={this.props.handleToggleTodoList}></input>
+        <label htmlFor="toggle-all">Mark as Complete!</label>
+        {this.props.toggleListState &&
         <ul className="todo-list">
-          <li className="completed">
-            <div className="view">
-              <input className="toggle" type="checkbox" ></input>
-              <label>Hello World React!!</label>
-              <button className="destroy"></button>
-            </div>
-            <input className="edit" value="Create a TodoMVC Template"></input>
-          </li>
-          <Todo />
+          {todos}
         </ul>
+        }
       </section>
     );
   }
 }
 
 class Todo extends React.Component {
+  handleDone() {
+    console.log("Crossed Out!");
+  }
+  handleDelete() {
+    console.log("Delete Clicked!");
+  }
   render() {
     return (
-      <li className="">
+      <li className={this.props.complete ? "completed" : ""}>
         <div className="view">
-          <input className="toggle" type="checkbox" checked></input>
-          <label>Simple Hello World!</label>
-          <button className="destroy"></button>
+          <input className="toggle" type="checkbox" onChange={this.handleDone} checked={(!!this.props.complete)}></input>
+          <label>{this.props.name}</label>
+          <button className="destroy" onClick={this.handleDelete}></button>
         </div>
-        <input className="edit" value="Create a TodoMVC Template"></input>
       </li>
     );
   }
