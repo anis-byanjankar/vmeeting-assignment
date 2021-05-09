@@ -5,8 +5,23 @@ import uuid from 'react-uuid';
 class TodoApp extends React.Component {
   constructor() {
     super()
+
+    const location = window.location.href;
+    var urlDisplayType = location.substring(location.indexOf("#")+2);
+    switch (urlDisplayType){
+      case "active":
+        urlDisplayType = "Active"
+        break;
+      case "completed":
+        urlDisplayType = "Completed"
+        break;
+      default:
+        urlDisplayType = "All"
+    }
+
+
     this.state = {
-      displayType: "All", 
+      displayType: urlDisplayType, 
       todoListElements: [
         {
           "id": uuid(), 
@@ -79,7 +94,9 @@ class TodoApp extends React.Component {
       todoListElements: newTodos,
     });
   }
+
   render() {
+    
     const total = this.state.todoListElements.length;
     const activeCount = this.state.todoListElements.filter((todo) => todo.complete===false).length;
 
@@ -90,7 +107,7 @@ class TodoApp extends React.Component {
           activeCount={activeCount}
           total={total}
         />
-          {total &&
+        {total!==0 &&
           <TodoList
             todoListElements={this.state.todoListElements}
             handleToggleTodoList={this.handleToggleTodoList}
@@ -99,18 +116,19 @@ class TodoApp extends React.Component {
             handleDelete={this.handleDelete}
             activeCount={activeCount}
             total={total}
-          />}
-        {total &&
+          />
+        }
 
-        <Footer 
-          handleDisplayType={this.handleDisplayType}
-          handleClearCompleted={this.handleClearCompleted}
-          todoListElements={this.state.todoListElements}
-          displayType={this.state.displayType}
-          activeCount={activeCount}
-          total={total}
-        />
-          }
+        {total!==0 &&
+          <Footer 
+            handleDisplayType={this.handleDisplayType}
+            handleClearCompleted={this.handleClearCompleted}
+            todoListElements={this.state.todoListElements}
+            displayType={this.state.displayType}
+            activeCount={activeCount}
+            total={total}
+          />
+        }
       </section>
     );
   }
