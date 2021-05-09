@@ -1,69 +1,48 @@
 import './App.css';
 import React from 'react'
 import uuid from 'react-uuid';
+import {createStore} from 'redux'
 
-class TodoApp extends React.Component {
-  constructor() {
-    super()
-
-    const location = window.location.href;
-    var urlDisplayType = location.substring(location.indexOf("#")+2);
-    switch (urlDisplayType){
-      case "active":
-        urlDisplayType = "Active"
-        break;
-      case "completed":
-        urlDisplayType = "Completed"
-        break;
-      default:
-        urlDisplayType = "All"
-    }
-
-
-    this.state = {
-      displayType: urlDisplayType, 
-      todoListElements: [
-        {
-          "id": uuid(), 
-          "name": "Learn React",
-          "complete": true 
-        },
-        {
-          "id": uuid(), 
-          "name": "Learn React2",
-          "complete": false 
-        },
-      ],
-    }
-    this.handleToggleTodoList = this.handleToggleTodoList.bind(this);
-    this.handleNewTodo = this.handleNewTodo.bind(this);
-    this.handleDone = this.handleDone.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleDisplayType = this.handleDisplayType.bind(this);
-    this.handleClearCompleted = this.handleClearCompleted.bind(this);
+function getURL(){
+  // Pull the url path and location.
+  const location = window.location.href;
+  var urlDisplayType = location.substring(location.indexOf("#")+2);
+  switch (urlDisplayType){
+    case "active":
+      urlDisplayType = "Active"
+      break;
+    case "completed":
+      urlDisplayType = "Completed"
+      break;
+    default:
+      urlDisplayType = "All"
   }
-  //activeCount = this.state.todoListElements.filter((todo) => todo.complete===true).length;
-  handleToggleTodoList(all) {
-    console.log(all)
-    const   newTodos = this.state.todoListElements.map((todo) => {
-          return Object.assign({}, todo, {
-            complete: all,
-          });
-       
-      });
-   
-    this.setState({
+  return urlDisplayType
+
+}
+
+function reducer(state, action) {
+  if (action.type === 'NEW_TODO') {
+    return {
+      displayType: state.displayType, 
+      todoListElements: [...state.todoListElements,action.message],
+    };
+  } else if (action.type === 'DELETE_TODO') {
+    const newTodos = state.todoListElements.filter((todo) => todo.id!==action.id );
+    return {
+      displayType: state.displayType, 
       todoListElements: newTodos,
-    });
+    };
   }
-  handleNewTodo(todo) {
-    console.log("New Todo added: " + todo);
-    this.setState({ todoListElements: [...this.state.todoListElements, {"id": uuid(),"name": todo, "complete": false}]})
+  else if (action.type === 'UPDATE_DISPLAYTYPE'){
+    return {
+      displayType: action.displayType,
+      todoListElements: state.todoListElements,
+    };
   }
-
-  handleDone(id){
-    const newTodos = this.state.todoListElements.map((todo) => {
-      if (todo.id === id) {
+  else if (action.type === 'COMPLETE_TODO'){
+    const newTodos = state.todoListElements.map((todo) => {
+      if (todo.id === action.id) {
         return Object.assign({}, todo, {
           complete: !todo.complete,
         });
@@ -71,34 +50,110 @@ class TodoApp extends React.Component {
         return todo;
       }
     });
-    this.setState({
+    return {
+      displayType: state.displayType,
       todoListElements: newTodos,
+    };
+  }
+  else if(action.type === 'ALL_COMPLETE'){
+    const newTodos = state.todoListElements.map((todo) => {
+      return Object.assign({}, todo, {
+        complete: action.complete,
+      });
+     
+    });
+    return {
+      displayType: state.displayType,
+      todoListElements: newTodos,
+    };
+  } 
+  else if(action.type === 'CLEAR_COMPLETED'){
+    const newTodos = state.todoListElements.filter((todo) => todo.complete===false );
+    return {
+      displayType: state.displayType,
+      todoListElements: newTodos,
+    };
+  }else {
+    return state;
+  }
+}
+
+const initialState = {  
+  displayType: getURL(), 
+  todoListElements: [
+    {
+      "id": uuid(), 
+      "name": "Learn React",
+      "complete": true 
+    },
+    {
+      "id": uuid(), 
+      "name": "Learn React2",
+      "complete": false 
+    },
+  ], };
+
+const store = createStore(reducer,initialState);
+
+class TodoApp extends React.Component {
+  componentDidMount(){
+    store.subscribe(() => this.forceUpdate()); 
+  }
+
+  handleToggleTodoList(all) {
+    console.log("ALL_COMPLETE");
+    store.dispatch({
+      type: 'ALL_COMPLETE',
+      complete: all,
+    });
+    console.log(all);
+  }
+  handleNewTodo(todo) {
+    // console.log("NEW_TODO" + todo);
+    store.dispatch({
+      type: 'NEW_TODO',
+      message: {
+        "id": uuid(),
+        "name": todo,
+        "complete": false,
+      },
+    });
+  }
+
+  handleDone(id){
+    // console.log("COMPLETE_TODO");
+    store.dispatch({
+      type: 'COMPLETE_TODO',
+      id: id,
     });
   }
 
   handleDelete(id){
-    const newTodos = this.state.todoListElements.filter((todo) => todo.id!==id );
-    this.setState({
-      todoListElements: newTodos,
+    store.dispatch({
+      type: 'DELETE_TODO',
+      id: id,
     });
   }
 
-  handleDisplayType(type){
-    this.setState({displayType: type});
+  handleDisplayType(display){
+    console.log("UPDATE DT "+ display)
+    store.dispatch({
+      type: 'UPDATE_DISPLAYTYPE',
+      displayType: display
+    });
   }
 
   handleClearCompleted(){
-    console.log("Clear Completed!!!")
-    const newTodos = this.state.todoListElements.filter((todo) => todo.complete===false );
-    this.setState({
-      todoListElements: newTodos,
+    console.log("CLEAR_COMPLETED")
+    store.dispatch({
+      type: 'CLEAR_COMPLETED',
     });
   }
 
   render() {
-    
-    const total = this.state.todoListElements.length;
-    const activeCount = this.state.todoListElements.filter((todo) => todo.complete===false).length;
+    const state = store.getState()
+    const total = state.todoListElements.length;
+    const activeCount = state.todoListElements.filter((todo) => todo.complete===false).length;
 
     return (
       <section className="todoapp">
@@ -109,9 +164,9 @@ class TodoApp extends React.Component {
         />
         {total!==0 &&
           <TodoList
-            todoListElements={this.state.todoListElements}
+            todoListElements={state.todoListElements}
             handleToggleTodoList={this.handleToggleTodoList}
-            displayType={this.state.displayType}
+            displayType={state.displayType}
             handleDone={this.handleDone}
             handleDelete={this.handleDelete}
             activeCount={activeCount}
@@ -123,8 +178,8 @@ class TodoApp extends React.Component {
           <Footer 
             handleDisplayType={this.handleDisplayType}
             handleClearCompleted={this.handleClearCompleted}
-            todoListElements={this.state.todoListElements}
-            displayType={this.state.displayType}
+            todoListElements={state.todoListElements}
+            displayType={state.displayType}
             activeCount={activeCount}
             total={total}
           />
@@ -198,6 +253,7 @@ class TodoList extends React.Component {
                 flag = !todo.complete? true: false
               }
           }
+          console.log(todo.id + " "+todo.complete + " "+this.props.displayType)
 
           if (flag){
             return (
@@ -210,10 +266,9 @@ class TodoList extends React.Component {
                 handleDelete={this.handleDelete}
               />
             );
+          }else{
+            return null
           }
-
-          console.log(todo.id + " "+todo.complete + " "+this.props.displayType)
-          
         
       });
 
