@@ -2,7 +2,8 @@ import {store} from '../Helpers/Store'
 import {ACTIONS} from '../Helpers/Helper'
 
 function Footer(props) {
-    
+    const data = store.getState();
+
     function handleClearCompleted(){
         console.log(ACTIONS.CLEAR_COMPLETED)
         store.dispatch({
@@ -24,13 +25,13 @@ function Footer(props) {
           <span className="todo-count"><strong>{props.activeCount}</strong> item left</span>
           <ul className="filters">
             <li>
-              <a className={props.displayType==="All"?"selected":""} href="#/" onClick={handleDisplayType}>All</a>
+              <a className={data.displayType==="All"?"selected":""} href="#/" onClick={handleDisplayType}>All</a>
             </li>
             <li>
-              <a className={props.displayType==="Active"?"selected":""} href="#/active" onClick={handleDisplayType}>Active</a>
+              <a className={data.displayType==="Active"?"selected":""} href="#/active" onClick={handleDisplayType}>Active</a>
             </li>
             <li>
-              <a className={props.displayType==="Completed"?"selected":""} href="#/completed" onClick={handleDisplayType}>Completed</a>
+              <a className={data.displayType==="Completed"?"selected":""} href="#/completed" onClick={handleDisplayType}>Completed</a>
             </li>
           </ul>
           {props.total!==props.activeCount?<button className="clear-completed" onClick={handleClearCompleted}>Clear completed</button>:""}

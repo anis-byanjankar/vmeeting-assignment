@@ -3,6 +3,7 @@ import {store} from '../Helpers/Store'
 import {ACTIONS} from '../Helpers/Helper'
 
 function TodoList(props){
+    const data = store.getState();
 
     function handleToggleTodoList(){
       console.log("TOggleaa!!!" + props.total +" "+ props.activeCount)
@@ -19,11 +20,11 @@ function TodoList(props){
         complete: completed,
       });
     }
-        const todos = props.todoListElements.map((todo) => {
+        const todos = data.todoListElements.map((todo) => {
             let flag = true;
   
-            if (props.displayType!=="All"){
-                if (props.displayType==="Completed"){
+            if (data.displayType!=="All"){
+                if (data.displayType==="Completed"){
                   flag = todo.complete? true: false
                 }
                 else{

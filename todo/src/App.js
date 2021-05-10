@@ -24,8 +24,6 @@ function TodoApp() {
         />
         {total!==0 &&
           <TodoList
-            todoListElements={state.todoListElements}
-            displayType={state.displayType}
             activeCount={activeCount}
             total={total}
           />
@@ -33,8 +31,6 @@ function TodoApp() {
 
         {total!==0 &&
           <Footer 
-            todoListElements={state.todoListElements}
-            displayType={state.displayType}
             activeCount={activeCount}
             total={total}
           />
