@@ -1,14 +1,17 @@
 import Todo from './Todo'
 import {store} from '../Helpers/Store'
 import {ACTIONS} from '../Helpers/Helper'
+import {useContext} from 'react'
+import dataContext from '../Helpers/Context';
 
 function TodoList(props){
     const data = store.getState();
+    const contextData = useContext(dataContext)
 
     function handleToggleTodoList(){
-      console.log("TOggleaa!!!" + props.total +" "+ props.activeCount)
+      console.log("TOggleaa!!!" + contextData.total +" "+ contextData.activeCount)
       let completed = null
-      if (props.activeCount === 0 && props.total!==0){
+      if (contextData.activeCount === 0 && contextData.total!==0){
         completed = false;
       }
       else{

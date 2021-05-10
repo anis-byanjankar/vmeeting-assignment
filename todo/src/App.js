@@ -4,6 +4,7 @@ import Footer from './Components/Footer'
 import TodoList from './Components/TodoList'
 import InputArea from './Components/InputArea'
 import {store} from './Helpers/Store'
+import { DataProvider } from './Helpers/Context'
 
 
 function TodoApp() {
@@ -16,25 +17,26 @@ function TodoApp() {
       store.subscribe(() => forceUpdate());
     });
 
+    const data = {
+      "total": total,
+      "activeCount": activeCount
+    }
+    
     return (
       <section className="todoapp">
+      <DataProvider value={data}>
         <InputArea 
-          activeCount={activeCount}
-          total={total}
         />
         {total!==0 &&
           <TodoList
-            activeCount={activeCount}
-            total={total}
           />
         }
 
         {total!==0 &&
           <Footer 
-            activeCount={activeCount}
-            total={total}
           />
         }
+        </DataProvider>
       </section>
     );
 }
